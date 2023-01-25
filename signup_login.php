@@ -4,7 +4,7 @@
 session_start();
 if(isset($_POST['login'])){
   $email = mysqli_real_escape_string($conn, $_POST['email']);
-  $pass = ($_POST['password']);
+  $pass = sha1($_POST['password']);
   $select = " SELECT * FROM user_form WHERE email = '$email' && password = '$pass' ";
   $result = mysqli_query($conn, $select);
 
@@ -39,7 +39,7 @@ if(isset($_POST['register'])){
     }
     else{
 
-        $pass = sha1 ($_POST['password']);
+        $pass = sha1($_POST['password']);
         $cpass = sha1($_POST['cpassword']);
         $select = " SELECT * FROM user_form WHERE email = '$email' && password = '$pass' ";
         
@@ -47,7 +47,7 @@ if(isset($_POST['register'])){
         
         if(mysqli_num_rows($result) > 0){
            
-           $error[] = 'user already exist!';
+           $error[] = 'User already exist!';
            
          }else{
             

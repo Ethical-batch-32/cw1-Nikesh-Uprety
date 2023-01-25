@@ -46,27 +46,39 @@ if(isset($_FILES['imagee'])){
 
 }
 
-
+// To upload the profile image for the user
 if(isset($_POST['submit'])){
 	$user_image =($_POST['imagee']);
     if(empty($file_name)) {
         // the input field is empty
-        echo "Please enter a value in the input field.";
+        $error[] = 'Please enter a value in the input field.';
     }
 
 	$sqlii = "INSERT INTO profile_image(name, image_name) VALUES ('$user_name','$file_name')";
 
 	if(mysqli_query($conn, $sqlii)){
 		header('location:myprofile.php');
-		// echo "Records added successfully.";
+        $error[] = 'Profile Picture was Updated successfully';
 	} else{
 		echo "ERROR: Could not able to execute $sql. " . mysqli_error($conn);
 	}
 }
-
+// To display the bio 
 	$Bio = "SELECT bio FROM user_bio WHERE name = '$user_name' ORDER BY created_at DESC ";
 	$bio_result = mysqli_query($conn, $Bio);
 	$bio_row = mysqli_fetch_assoc($bio_result);
+
+// To update the bio
+if(isset($_POST['biosubmit'])){
+	$bio =($_POST['bio']);
+	$sql = "INSERT INTO user_bio(bio,name) VALUES ('$bio','$user_name')";
+	if(mysqli_query($conn, $sql)){
+		header('location:myprofile.php');
+		// echo "Records added successfully.";
+	} else{
+		echo "ERROR: Could not able to execute $sql. " . mysqli_error($conn);
+	}
+} 
 };
 ?>
 
@@ -125,7 +137,8 @@ if(isset($_POST['submit'])){
                                 <h1><?php echo $_SESSION['user_name'] ?></h1>
                                 <span class="author-description">
 
-                                    <div class="input-group mb-3">
+                                    <div class="mb-3" >
+                                    <!-- style="position:relative;width:100%;" -->
                                         <?php
 
 												// Check if the text value exists in the database
@@ -135,7 +148,16 @@ if(isset($_POST['submit'])){
 												  $bio_text=$bio_row['bio'];
 												  echo $bio_text;
                                                   ?>
-                                                    <a href="bioo.php" class="btn follow">Edit Bio</a>
+                                                    <button class="btn follow biooo" onclick="pop()">Edit Bio</button>
+                                                    <form action="" method="post">
+                                                      <!-- <a href="#" class="btn follow" onclick="pop()">Edit Bio</a> -->
+                                                      <div class="biopop">
+                                                        <span class="biotext" id="myPopup">
+                                                          <input required type="text" name="bio" placeholder="Add a new bio"/>
+                                                          <button type="submit" name="biosubmit" value="submit" class="btn" style="height=5px;width=10px;">Upload</button>
+                                                        </span>
+                                                      </div>
+                                                    </form>
                                         <?php
                                                 
                                                 } 
@@ -143,9 +165,17 @@ if(isset($_POST['submit'])){
 												  // If the text value does not exist, display the form field
 													?>
                                         <div class="input-group-append">
-                                            <form action="bioo.php">
-                                                <button class="btn btn-outline-secondary" name="submit">CLick here to add bio</button>
-                                            </form>
+                                            
+                                                <button class="btn btn-outline-secondary" onclick="pop()">CLick here to add bio</button>
+                                                <form action="" method="post">
+                                                      <!-- <a href="#" class="btn follow" onclick="pop()">Edit Bio</a> -->
+                                                      <div class="biopop">
+                                                        <span class="biotext" id="myPopup">
+                                                          <input required type="text" name="bio" placeholder="Add a new bio"/>
+                                                          <button type="submit" name="biosubmit" value="submit" class="btn" style="height=5px;width=10px;">Upload</button>
+                                                        </span>
+                                                      </div>
+                                                    </form>
                                         </div>
                                         <?php
 												}
@@ -159,10 +189,18 @@ if ($imagequery->num_rows !== 0) {
 ?>
                             <div class="col-md-2 col-xs-12">
                                 <img
-                                    class="img-size"
+                                    class="img-size profile"
                                     src="http://localhost/blogsnepal/assets/Profile_image/<?php echo $rowimage['image_name']?>"
                                     ;=";"
                                     alt=" <?php echo $_SESSION['user_name'] ?>">
+                                    <button class="btn follow edit" onclick="openForm()">Edit Picture</button>
+                                    <div class="form-popup mainheading" id="myForm">
+                                      <form action="" method="post" enctype="multipart/form-data" class="form-container">
+                                      <input required type="file" id="myFile" name="imagee">
+                                        <button type="submit" name="submit" value="submit" class="btn">Upload</button>
+                                        <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+                                      </form>
+                                    </div>
                             </div>
                         <?php
 } 
@@ -242,7 +280,7 @@ while ($row = mysqli_fetch_array($rest)) {
                                             <a href="myprofile.php"><?php echo $_SESSION['user_name'] ?></a>
                                         </span><br/>
                                         <span class="post-date"><?php echo date('F jS, Y', strtotime($row['created_at']))?></span>
-                                        <span class="dot"></span><span class="post-read">6 min read</span>
+                                        
                                     </span>
                                     <span class="post-read-more">
                                         <div class="dropdown">
@@ -251,7 +289,7 @@ while ($row = mysqli_fetch_array($rest)) {
                                             </button>
                                             <div class="dropdown-menu">
                                               <a class="dropdown-item" href="myprofile.php?id=<?=$row['Id']?>">Delete Post</a>
-                                              <a class="dropdown-item" href="#">Edit Post</a>
+                                              
                                             </div>
                                         </div>
         
@@ -283,11 +321,26 @@ while ($row = mysqli_fetch_array($rest)) {
                 ================================================== -->
                 <!-- Placed at the end of the document so the pages load faster -->
                 <script src="assets/js/jquery.min.js"></script>
+                <script>
+                function pop() {
+                    var popup = document.getElementById('myPopup');
+                    popup.classList.toggle('show');
+                }
+                </script>
                 <script
                     src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
                     integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
                     crossorigin="anonymous"></script>
                 <script src="assets/js/bootstrap.min.js"></script>
+                <script>
+                    function openForm() {
+                      document.getElementById("myForm").style.display = "block";
+                    }
+
+                    function closeForm() {
+                      document.getElementById("myForm").style.display = "none";
+                    }
+                </script>
                 <script src="assets/js/elements.js"></script>
                 <script src="assets/js/ie10-viewport-bug-workaround.js"></script>
             </body>
